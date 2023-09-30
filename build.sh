@@ -18,19 +18,19 @@ mkdir -p ./data/{minio,nginx}
 
 echo $PRE Checkout excalidraw repo...
 if [ ! -d "$SRC_REPO/excalidraw" ]; then
-    git clone https://github.com/excalidraw/excalidraw.git $SRC_REPO/excalidraw
+    git clone https://github.com/anotherspot/excalidraw.git $SRC_REPO/excalidraw
     ln -s $SRC_REPO/excalidraw $DIR/excalidraw
 fi
 
 echo $PRE Checkout excalidraw-json repo...
 if [ ! -d "$SRC_REPO/excalidraw-json" ]; then
-    git clone https://github.com/NMinhNguyen/excalidraw-json.git $SRC_REPO/excalidraw-json
+    git clone https://github.com/anotherspot/excalidraw-json.git $SRC_REPO/excalidraw-json
     sed -i "/origin: getOrigins(),/a \ \ methods: ['GET', 'HEAD', 'POST']," $SRC_REPO/excalidraw-json/src/server/corsMiddleware.ts
 fi
 
 echo $PRE Checkout excalidraw-room repo...
 if [ ! -d "$SRC_REPO/excalidraw-room" ]; then
-    git clone https://github.com/excalidraw/excalidraw-room.git $SRC_REPO/excalidraw-room
+    git clone https://github.com/anotherspot/excalidraw-room.git $SRC_REPO/excalidraw-room
 fi
 
 echo $PRE Copying excalidraw-json Dockerfile...
@@ -41,9 +41,9 @@ if [ -n "$(docker swarm join-token manager 2>&1 | grep 'not a swarm manager')" ]
     docker swarm init
 fi
 
-if [ $(docker network ls | grep excalidraw-net | wc -l) = 0 ]; then
+if [ $(docker network ls | grep draw | wc -l) = 0 ]; then
     echo $PRE Creating overlay network...
-    docker network create --driver=overlay --attachable excalidraw-net
+    docker network create --driver=overlay --attachable draw
 fi
 
 echo $PRE Stopping all services...
@@ -92,7 +92,7 @@ if [ ! -d $DIR/data/minio/excalidraw ]; then
     done
     printf '\n'
 
-cat <<EOF | docker run --rm -i --entrypoint=/bin/sh --network="excalidraw-net" minio/mc
+cat <<EOF | docker run --rm -i --entrypoint=/bin/sh --network="draw" minio/mc
   /usr/bin/mc config host add myminio http://minio:9000 ${EXCALIDRAW_S3_ACCESS_KEY_ID} ${EXCALIDRAW_S3_SECRET_ACCESS_KEY};
   /usr/bin/mc mb myminio/excalidraw;
   /usr/bin/mc policy set download myminio/excalidraw;
